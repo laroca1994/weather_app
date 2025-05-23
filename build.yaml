@@ -1,0 +1,6 @@
+targets:
+  $default:
+    builders:
+      drift_dev:builder:
+        generate_for:
+          - lib/data/database/app_database.dart
