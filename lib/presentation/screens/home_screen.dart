@@ -50,8 +50,8 @@ class HomeScreen extends ConsumerWidget {
         child: ListView(
           children: [
             // Use GooglePlacesSearchBar if implemented
-            CitySearchBar(
-              onSearch: (cityName) {
+            GooglePlacesSearchBar(
+              onPlaceSelected: (cityName) {
                 ref
                     .read(weatherNotifierProvider.notifier)
                     .fetchWeatherForCity(cityName);

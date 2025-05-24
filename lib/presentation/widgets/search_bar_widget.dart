@@ -1,58 +1,58 @@
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 
-class CitySearchBar extends StatefulWidget {
-  final Function(String cityName) onSearch;
+// class CitySearchBar extends StatefulWidget {
+//   final Function(String cityName) onSearch;
 
-  const CitySearchBar({super.key, required this.onSearch});
+//   const CitySearchBar({super.key, required this.onSearch});
 
-  @override
-  State<CitySearchBar> createState() => _CitySearchBarState();
-}
+//   @override
+//   State<CitySearchBar> createState() => _CitySearchBarState();
+// }
 
-class _CitySearchBarState extends State<CitySearchBar> {
-  final _textController = TextEditingController();
+// class _CitySearchBarState extends State<CitySearchBar> {
+//   final _textController = TextEditingController();
 
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     _textController.dispose();
+//     super.dispose();
+//   }
 
-  void _submit() {
-    if (_textController.text.isNotEmpty) {
-      widget.onSearch(_textController.text);
-      // _textController.clear(); // Optional: clear after search
-      FocusScope.of(context).unfocus(); // Hide keyboard
-    }
-  }
+//   void _submit() {
+//     if (_textController.text.isNotEmpty) {
+//       widget.onSearch(_textController.text);
+//       // _textController.clear(); // Optional: clear after search
+//       FocusScope.of(context).unfocus(); // Hide keyboard
+//     }
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        controller: _textController,
-        decoration: InputDecoration(
-          hintText: 'Buscar ciudad...',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-          suffixIcon: IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: _submit,
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-        ),
-        onSubmitted: (_) => _submit(),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: TextField(
+//         controller: _textController,
+//         decoration: InputDecoration(
+//           hintText: 'Buscar ciudad...',
+//           border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
+//           suffixIcon: IconButton(
+//             icon: const Icon(Icons.search),
+//             onPressed: _submit,
+//           ),
+//           contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+//         ),
+//         onSubmitted: (_) => _submit(),
+//       ),
+//     );
+//   }
+// }
 
 // TODO: Implement Google Places Search Bar.
 // For google_places_flutter package:
-/*
+
 import 'package:flutter/material.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
-import 'package:flutter_weather_app/core/constants/api_keys.dart';
+import 'package:wheater_app/core/constants/api_keys.dart';
 
 class GooglePlacesSearchBar extends StatelessWidget {
   final Function(String cityName) onPlaceSelected;
@@ -95,4 +95,3 @@ class GooglePlacesSearchBar extends StatelessWidget {
     );
   }
 }
-*/
