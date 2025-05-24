@@ -4,7 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:wheater_app/core/errors/failure.dart';
 
 class LocationService {
-  Future<Either<Failure, Position>>getCurrentPosition() async {
+  Future<Either<Failure, Position>> getCurrentPosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -22,16 +22,22 @@ class LocationService {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return Left(LocationFailure(
-          'Location permissions are permanently denied, we cannot request permissions.'));
+      return Left(
+        LocationFailure(
+          'Location permissions are permanently denied, we cannot request permissions.',
+        ),
+      );
     }
 
     try {
       final position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+        locationSettings: const LocationSettings(),
+      );
       return Right(position);
     } catch (e) {
-      return Left(LocationFailure('Failed to get current location: ${e.toString()}'));
+      return Left(
+        LocationFailure('Failed to get current location: ${e.toString()}'),
+      );
     }
   }
 }
@@ -45,7 +51,8 @@ final currentPositionProvider = FutureProvider<Position>((ref) async {
   final locationService = ref.watch(locationServiceProvider);
   final result = await locationService.getCurrentPosition();
   return result.fold(
-    (failure) => throw failure, // Propagate failure to FutureProvider's error state
+    (failure) =>
+        throw failure, // Propagate failure to FutureProvider's error state
     (position) => position,
   );
 });
