@@ -14,10 +14,10 @@ class GooglePlacesSearchBar extends StatelessWidget {
         textEditingController:
             TextEditingController(), // You might want to manage this
         googleAPIKey: ApiKeys.googlePlacesApiKey,
-        inputDecoration: InputDecoration(
+        inputDecoration: const InputDecoration(
           hintText: 'Search your location',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+          // border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
         ),
         debounceTime: 400,
         getPlaceDetailWithLatLng: (prediction) {
