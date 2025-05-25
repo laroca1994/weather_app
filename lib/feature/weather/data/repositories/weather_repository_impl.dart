@@ -178,7 +178,10 @@ class WeatherRepositoryImpl implements WeatherRepository {
     if (cachedData != null) {
       id = cachedData.id;
       // Optional: Check if data is stale (e.g., older than 1 hour)
-      if (DateTime.now().difference(cachedData.lastFetched).inMinutes < 60) {
+      if (DateTime.now()
+              .difference(cachedData.lastFetched.toLocal())
+              .inMinutes <
+          60) {
         final weatherModel = WeatherModel.fromJson(
           jsonDecode(cachedData.fullJsonResponse),
         );

@@ -23,7 +23,7 @@ class AppConstants {
       imageUrl: Assets.images.montevideo.path,
     ),
     CityCoordinates(
-      city: 'Londres',
+      city: 'London',
       lat: 51.5074,
       lon: -0.1278,
       imageUrl: Assets.images.londres.path,
