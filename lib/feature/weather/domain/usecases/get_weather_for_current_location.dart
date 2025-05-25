@@ -7,8 +7,8 @@ import 'package:wheater_app/feature/weather/domain/repositories/weather_reposito
 
 
 class GetWeatherForCurrentLocation {
-  final WeatherRepository repository;
   GetWeatherForCurrentLocation(this.repository);
+  final WeatherRepository repository;
 
   Future<Either<Failure, WeatherEntity>> call(double lat, double lon) {
     return repository.getWeatherForCoordinates(lat, lon);

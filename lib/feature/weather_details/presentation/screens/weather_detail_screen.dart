@@ -8,9 +8,9 @@ import 'package:wheater_app/feature/weather/domain/entities/weather_entity.dart'
 import 'package:wheater_app/shared/widgets/weather_display.dart';
 
 class WeatherDetailScreen extends StatelessWidget {
-  final WeatherEntity weather;
 
-  const WeatherDetailScreen({super.key, required this.weather});
+  const WeatherDetailScreen({required this.weather, super.key});
+  final WeatherEntity weather;
 
   @override
   Widget build(BuildContext context) {

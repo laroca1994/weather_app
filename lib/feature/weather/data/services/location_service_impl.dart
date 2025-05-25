@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:wheater_app/core/errors/failure.dart';
 import 'package:wheater_app/feature/weather/domain/services/location_service.dart';
 

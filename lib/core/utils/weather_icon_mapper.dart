@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 Widget getWeatherIcon(String iconCode, {double size = 50}) {
   // Using NetworkImage directly for simplicity
-  String iconUrl = 'https://openweathermap.org/img/wn/$iconCode@2x.png';
+  final String iconUrl = 'https://openweathermap.org/img/wn/$iconCode@2x.png';
   return Image.network(
     iconUrl,
     width: size,

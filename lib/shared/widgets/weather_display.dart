@@ -5,8 +5,8 @@ import 'package:wheater_app/feature/weather/domain/entities/weather_entity.dart'
  // For date formatting, add to pubspec.yaml if not present
 
 class WeatherDisplay extends StatelessWidget {
+  const WeatherDisplay({required this.weather, super.key});
   final WeatherEntity weather;
-  const WeatherDisplay({super.key, required this.weather});
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +91,9 @@ class WeatherDisplay extends StatelessWidget {
 
 extension StringExtension on String {
     String capitalizeFirst() {
-      if (isEmpty) return this;
-      return "${this[0].toUpperCase()}${substring(1)}";
+      if (isEmpty) {
+        return this;
+      }
+      return '${this[0].toUpperCase()}${substring(1)}';
     }
 }

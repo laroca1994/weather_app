@@ -1,15 +1,16 @@
 import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:dio/dio.dart';
-import 'package:wheater_app/core/errors/failure.dart';
 import 'package:wheater_app/core/database/app_database.dart';
+import 'package:wheater_app/core/errors/failure.dart';
 import 'package:wheater_app/feature/weather/data/datasources/weather_remote_datasource.dart';
+import 'package:wheater_app/feature/weather/data/models/weather_model.dart'; // For DioException
 import 'package:wheater_app/feature/weather/domain/entities/weather_entity.dart';
 import 'package:wheater_app/feature/weather/domain/repositories/weather_repository.dart';
-import 'package:wheater_app/feature/weather/data/models/weather_model.dart'; // For DioException
 
 final weatherRepositoryProvider = Provider<WeatherRepository>((ref) {
   return WeatherRepositoryImpl(
@@ -18,14 +19,14 @@ final weatherRepositoryProvider = Provider<WeatherRepository>((ref) {
   );
 });
 
-class WeatherRepositoryImpl implements WeatherRepository {
-  final WeatherRemoteDataSource remoteDataSource;
-  final WeatherDao localDataSource; // Assuming you've named your DAO this way
+class WeatherRepositoryImpl implements WeatherRepository { // Assuming you've named your DAO this way
 
   WeatherRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
   });
+  final WeatherRemoteDataSource remoteDataSource;
+  final WeatherDao localDataSource;
 
   @override
   Future<Either<Failure, WeatherEntity>> getWeatherForCityAndCountry({

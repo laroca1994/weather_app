@@ -15,16 +15,16 @@ final weatherNotifierProvider =
       );
     });
 
-class WeatherNotifier extends StateNotifier<WeatherState> {
-  final GetWeatherForCity _getWeatherForCity;
-  final GetWeatherForCurrentLocation _getWeatherForCurrentLocation;
-  final Ref _ref; // To access other providers
+class WeatherNotifier extends StateNotifier<WeatherState> { // To access other providers
 
   WeatherNotifier(
     this._getWeatherForCity,
     this._getWeatherForCurrentLocation,
     this._ref,
   ) : super(const WeatherState.initial());
+  final GetWeatherForCity _getWeatherForCity;
+  final GetWeatherForCurrentLocation _getWeatherForCurrentLocation;
+  final Ref _ref;
 
   Future<void> fetchWeatherForCity({
     required String cityName,
@@ -40,7 +40,7 @@ class WeatherNotifier extends StateNotifier<WeatherState> {
       (weather) => state = WeatherState.loaded(weather: weather),
     );
     // After fetching, update the saved searches list as well
-    _ref.read(savedSearchesNotifierProvider.notifier).fetchSavedSearches();
+     _ref.read(savedSearchesNotifierProvider.notifier).fetchSavedSearches().ignore();
   }
 
   Future<void> fetchWeatherForCurrentLocation() async {
@@ -57,7 +57,7 @@ class WeatherNotifier extends StateNotifier<WeatherState> {
         (weather) => state = WeatherState.loaded(weather: weather),
       );
       // After fetching, update the saved searches list as well
-      _ref.read(savedSearchesNotifierProvider.notifier).fetchSavedSearches();
+      _ref.read(savedSearchesNotifierProvider.notifier).fetchSavedSearches().ignore();
     } catch (e) {
       state = WeatherState.error(
         'Failed to get location or weather: ${e.toString()}',
@@ -73,12 +73,12 @@ final savedSearchesNotifierProvider =
     });
 
 class SavedSearchesNotifier extends StateNotifier<SavedSearchesState> {
-  final GetSavedSearches _getSavedSearches;
 
   SavedSearchesNotifier(this._getSavedSearches)
     : super(const SavedSearchesState.initial()) {
     fetchSavedSearches(); // Load initially
   }
+  final GetSavedSearches _getSavedSearches;
 
   Future<void> fetchSavedSearches() async {
     state = const SavedSearchesState.loading();

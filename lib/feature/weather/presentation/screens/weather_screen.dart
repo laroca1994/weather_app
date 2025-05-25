@@ -120,7 +120,7 @@ class WeatherScreen extends ConsumerWidget {
                 ? [
                   const Padding(
                     padding: EdgeInsets.all(16.0),
-                    child: Text("No recent searches."),
+                    child: Text('No recent searches.'),
                   ),
                 ]
                 : searches
@@ -146,7 +146,7 @@ class WeatherScreen extends ConsumerWidget {
     WeatherState currentWeatherState,
   ) {
     // Filter out default cities if they are already in recent searches or currently displayed
-    List<(String, String)> citiesToShow = List.from(AppConstants.defaultCities);
+    final List<(String, String)> citiesToShow = List.from(AppConstants.defaultCities);
 
     if (currentWeatherState is WeatherLoaded) {
       citiesToShow.removeWhere(

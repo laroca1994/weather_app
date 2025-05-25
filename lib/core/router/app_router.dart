@@ -39,8 +39,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
 // A simple error screen for routing issues
 class ErrorScreen extends StatelessWidget {
+  const ErrorScreen({required this.message, super.key});
   final String message;
-  const ErrorScreen({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {

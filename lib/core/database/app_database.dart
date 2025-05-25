@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+
 // Import your weather entity/model for Drift if different from API model
 // For simplicity, we'll store parts of WeatherModel directly or a simplified version.
 part 'app_database.g.dart';

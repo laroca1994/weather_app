@@ -7,8 +7,8 @@ import 'package:wheater_app/feature/weather/domain/repositories/weather_reposito
 // To access the provider
 
 class GetWeatherForCity {
-  final WeatherRepository repository;
   GetWeatherForCity(this.repository);
+  final WeatherRepository repository;
 
   Future<Either<Failure, WeatherEntity>> call({
     required String cityName,

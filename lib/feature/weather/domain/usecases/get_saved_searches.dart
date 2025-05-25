@@ -7,8 +7,8 @@ import 'package:wheater_app/feature/weather/domain/repositories/weather_reposito
 
 
 class GetSavedSearches {
-  final WeatherRepository repository;
   GetSavedSearches(this.repository);
+  final WeatherRepository repository;
 
   Future<Either<Failure, List<WeatherEntity>>> call() {
     return repository.getSavedSearches();
