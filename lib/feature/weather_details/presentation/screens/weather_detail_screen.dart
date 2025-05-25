@@ -6,8 +6,13 @@ import 'package:intl/intl.dart';
 import 'package:wheater_app/feature/weather/domain/entities/weather_entity.dart';
 
 class WeatherDetailScreen extends StatelessWidget {
-  const WeatherDetailScreen({required this.weather, super.key});
+  const WeatherDetailScreen({
+    required this.weather,
+    required this.isDefaultCity,
+    super.key,
+  });
   final WeatherEntity weather;
+  final bool isDefaultCity;
 
   String _formatTimeWithTimezone(int? timestamp, int? timezoneOffsetSeconds) {
     if (timestamp == null || timezoneOffsetSeconds == null) {
@@ -80,20 +85,40 @@ class WeatherDetailScreen extends StatelessWidget {
       fit: StackFit.expand,
       alignment: Alignment.center,
       children: [
-        Image.asset(
-          weather.imageUrl!,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: Colors.lightBlue[300],
-              alignment: Alignment.center,
-              child: const Text(
-                'Error al cargar imagen',
-                style: TextStyle(color: Colors.white70),
-              ),
-            );
-          },
-        ),
+        if (isDefaultCity)
+          Image.asset(
+            weather.imageUrl!,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: Colors.lightBlue[300],
+                alignment: Alignment.center,
+                child: const Text(
+                  'Error al cargar imagen',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              );
+            },
+          )
+        else ...[
+          if (weather.imageUrl != null)
+            Image.network(
+              weather.imageUrl!,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.lightBlue[300],
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Error al cargar imagen',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                );
+              },
+            )
+          else
+            Container(),
+        ],
         Container(color: Colors.black.withValues(alpha: 0.3)),
         SafeArea(
           child: Padding(

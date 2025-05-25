@@ -63,7 +63,11 @@ class WeatherDetailRoute extends $ExtraRequiredRoute<WeatherEntity> {
   static final GlobalKey<NavigatorState> $parentNavigatorKey = rootNavigatorKey;
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return WeatherDetailScreen(key: state.pageKey, weather: extra!);
+    return WeatherDetailScreen(
+      key: state.pageKey,
+      weather: extra!,
+      isDefaultCity: true,
+    );
   }
 
   @override
@@ -76,7 +80,11 @@ class HistoryDetailRoute extends $ExtraRequiredRoute<WeatherEntity> {
   static final GlobalKey<NavigatorState> $parentNavigatorKey = rootNavigatorKey;
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return WeatherDetailScreen(key: state.pageKey, weather: extra!);
+    return WeatherDetailScreen(
+      key: state.pageKey,
+      weather: extra!,
+      isDefaultCity: false,
+    );
   }
 
   @override

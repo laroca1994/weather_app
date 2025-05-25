@@ -61,7 +61,8 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
 class WeatherDao extends DatabaseAccessor<AppDatabase> with _$WeatherDaoMixin {
   WeatherDao(super.db);
 
-  Future<List<SavedWeatherData>> getAllSearches() => select(savedWeather).get();
+  Future<List<SavedWeatherData>> getAllSearches() =>
+      (select(savedWeather)..where((tbl) => tbl.isDefault.equals(false))).get();
 
   Future<SavedWeatherData?> getWeatherByCityName(String cityName) {
     return (select(savedWeather)..where(

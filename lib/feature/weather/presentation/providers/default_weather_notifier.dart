@@ -20,11 +20,11 @@ class DefaultWeatherController extends StateNotifier<List<WeatherEntity>> {
             .map(WeatherEntity.fromCitiesCoordinates)
             .toList(),
       ) {
-    _init();
+    init();
   }
   final WeatherRepository _weatherRepository;
 
-  Future<void> _init() async {
+  Future<void> init() async {
     final initialCities = List<WeatherEntity>.from(state);
 
     for (int i = 0; i < initialCities.length; i++) {

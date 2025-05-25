@@ -3,10 +3,8 @@ import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:wheater_app/core/constants/api_keys.dart';
 
 class GooglePlacesSearchBar extends StatelessWidget {
-
   const GooglePlacesSearchBar({required this.onPlaceSelected, super.key});
-  final Function({required String cityName, required String country})
-  onPlaceSelected;
+  final Function({required double lat, required double lon}) onPlaceSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -23,23 +21,24 @@ class GooglePlacesSearchBar extends StatelessWidget {
         ),
         debounceTime: 400,
         getPlaceDetailWithLatLng: (prediction) {
-          // This gives full place details
-          debugPrint('placeDetails ${prediction.lng}');
+          onPlaceSelected.call(
+            lat: double.tryParse(prediction.lat!) ?? 0,
+            lon: double.tryParse(prediction.lng!) ?? 0,
+          );
         },
         itemClick: (prediction) {
-          if (prediction.description != null) {
-            // Usually description is "City, Country" or "Place, City, Country"
-            // We need to extract the city name. This might need refinement.
-            final String cityName = prediction.description!.split(',').first.trim();
-            final String country = prediction.description!.split(',').last.trim();
-            onPlaceSelected(cityName: cityName, country: country);
-            // Clear the text field or close search UI
-            FocusScope.of(context).unfocus();
-          }
+          // if (prediction.description != null) {
+          //   // Usually description is "City, Country" or "Place, City, Country"
+          //   // We need to extract the city name. This might need refinement.
+          //   final String cityName =
+          //       prediction.description!.split(',').first.trim();
+          //   final String country =
+          //       prediction.description!.split(',').last.trim();
+          //   onPlaceSelected(cityName: cityName, country: country);
+          //   // Clear the text field or close search UI
+          //   FocusScope.of(context).unfocus();
+          // }
         },
-        // Optional:
-        // isCrossBtnShown: true,
-        // ... other properties
       ),
     );
   }

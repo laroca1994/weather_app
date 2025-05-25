@@ -1,66 +1,72 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wheater_app/feature/weather/domain/entities/weather_entity.dart';
 import 'package:wheater_app/feature/weather/domain/usecases/get_current_position.dart';
 import 'package:wheater_app/feature/weather/domain/usecases/get_saved_searches.dart';
-import 'package:wheater_app/feature/weather/domain/usecases/get_weather_for_city.dart';
-import 'package:wheater_app/feature/weather/domain/usecases/get_weather_for_current_location.dart';
-import 'package:wheater_app/feature/weather/presentation/providers/weather_state.dart';
+import 'package:wheater_app/feature/weather/domain/usecases/get_weather_for_coordinates.dart';
 
 // Provider for the main weather display (current/searched city)
 final weatherNotifierProvider =
-    StateNotifierProvider<WeatherNotifier, WeatherState>((ref) {
-      return WeatherNotifier(
-        ref.watch(getWeatherForCityUseCaseProvider),
-        ref.watch(getWeatherForCurrentLocationUseCaseProvider),
-        ref, // Pass ref to access other providers like location
-      );
+    AsyncNotifierProvider<WeatherNotifier, WeatherEntity?>(() {
+      return WeatherNotifier();
     });
 
-class WeatherNotifier extends StateNotifier<WeatherState> { // To access other providers
+class WeatherNotifier extends AsyncNotifier<WeatherEntity?> {
+  @override
+  FutureOr<WeatherEntity?> build() async {
+    return null;
+  }
 
-  WeatherNotifier(
-    this._getWeatherForCity,
-    this._getWeatherForCurrentLocation,
-    this._ref,
-  ) : super(const WeatherState.initial());
-  final GetWeatherForCity _getWeatherForCity;
-  final GetWeatherForCurrentLocation _getWeatherForCurrentLocation;
-  final Ref _ref;
-
-  Future<void> fetchWeatherForCity({
-    required String cityName,
-    required String country,
+  Future<void> fetchWeatherForCoordinates({
+    required double lat,
+    required double lon,
   }) async {
-    state = const WeatherState.loading();
-    final result = await _getWeatherForCity(
-      cityName: cityName,
-      country: country,
-    );
-    result.fold(
-      (failure) => state = WeatherState.error(failure.message),
-      (weather) => state = WeatherState.loaded(weather: weather),
-    );
-    // After fetching, update the saved searches list as well
-     _ref.read(savedSearchesNotifierProvider.notifier).fetchSavedSearches().ignore();
+    state = const AsyncValue.loading();
+    try {
+      final result = await ref
+          .read(getWeatherForCoordinatesUseCaseProvider)
+          .call(lat, lon);
+      result.fold(
+        (failure) =>
+            state = AsyncValue.error(failure.message, StackTrace.current),
+        (weather) => state = AsyncValue.data(weather),
+      );
+      // After fetching, update the saved searches list as well
+      ref
+          .read(savedSearchesNotifierProvider.notifier)
+          .fetchSavedSearches()
+          .ignore();
+    } catch (e) {
+      state = AsyncValue.error(
+        'Failed to get location or weather: ${e.toString()}',
+        StackTrace.current,
+      );
+    }
   }
 
   Future<void> fetchWeatherForCurrentLocation() async {
-    state = const WeatherState.loading();
+    state = const AsyncValue.loading();
     try {
       // Get current position using the FutureProvider
-      final position = await _ref.read(currentPositionProvider.future);
-      final result = await _getWeatherForCurrentLocation(
-        position.latitude,
-        position.longitude,
-      );
+      final position = await ref.read(currentPositionProvider.future);
+      final result = await ref
+          .read(getWeatherForCoordinatesUseCaseProvider)
+          .call(position.latitude, position.longitude);
       result.fold(
-        (failure) => state = WeatherState.error(failure.message),
-        (weather) => state = WeatherState.loaded(weather: weather),
+        (failure) =>
+            state = AsyncValue.error(failure.message, StackTrace.current),
+        (weather) => state = AsyncValue.data(weather),
       );
       // After fetching, update the saved searches list as well
-      _ref.read(savedSearchesNotifierProvider.notifier).fetchSavedSearches().ignore();
+      ref
+          .read(savedSearchesNotifierProvider.notifier)
+          .fetchSavedSearches()
+          .ignore();
     } catch (e) {
-      state = WeatherState.error(
+      state = AsyncValue.error(
         'Failed to get location or weather: ${e.toString()}',
+        StackTrace.current,
       );
     }
   }
@@ -68,24 +74,27 @@ class WeatherNotifier extends StateNotifier<WeatherState> { // To access other p
 
 // Provider for the list of saved searches
 final savedSearchesNotifierProvider =
-    StateNotifierProvider<SavedSearchesNotifier, SavedSearchesState>((ref) {
-      return SavedSearchesNotifier(ref.watch(getSavedSearchesUseCaseProvider));
+    AsyncNotifierProvider<SavedSearchesNotifier, List<WeatherEntity>>(() {
+      return SavedSearchesNotifier();
     });
 
-class SavedSearchesNotifier extends StateNotifier<SavedSearchesState> {
-
-  SavedSearchesNotifier(this._getSavedSearches)
-    : super(const SavedSearchesState.initial()) {
-    fetchSavedSearches(); // Load initially
+class SavedSearchesNotifier extends AsyncNotifier<List<WeatherEntity>> {
+  @override
+  FutureOr<List<WeatherEntity>> build() async {
+    final result = await ref.watch(getSavedSearchesUseCaseProvider).call();
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (searches) => searches,
+    );
   }
-  final GetSavedSearches _getSavedSearches;
 
   Future<void> fetchSavedSearches() async {
-    state = const SavedSearchesState.loading();
-    final result = await _getSavedSearches();
+    state = const AsyncValue.loading();
+    final result = await ref.watch(getSavedSearchesUseCaseProvider).call();
     result.fold(
-      (failure) => state = SavedSearchesState.error(failure.message),
-      (searches) => state = SavedSearchesState.loaded(searches: searches),
+      (failure) =>
+          state = AsyncValue.error(failure.message, StackTrace.current),
+      (searches) => state = AsyncValue.data(searches),
     );
   }
 }

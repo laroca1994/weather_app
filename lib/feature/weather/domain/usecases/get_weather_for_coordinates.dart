@@ -6,8 +6,8 @@ import 'package:wheater_app/feature/weather/domain/entities/weather_entity.dart'
 import 'package:wheater_app/feature/weather/domain/repositories/weather_repository.dart';
 
 
-class GetWeatherForCurrentLocation {
-  GetWeatherForCurrentLocation(this.repository);
+class GetWeatherForCoordinates {
+  GetWeatherForCoordinates(this.repository);
   final WeatherRepository repository;
 
   Future<Either<Failure, WeatherEntity>> call(double lat, double lon) {
@@ -15,6 +15,6 @@ class GetWeatherForCurrentLocation {
   }
 }
 
-final getWeatherForCurrentLocationUseCaseProvider = Provider<GetWeatherForCurrentLocation>((ref) {
-  return GetWeatherForCurrentLocation(ref.watch(weatherRepositoryProvider));
+final getWeatherForCoordinatesUseCaseProvider = Provider<GetWeatherForCoordinates>((ref) {
+  return GetWeatherForCoordinates(ref.watch(weatherRepositoryProvider));
 });
