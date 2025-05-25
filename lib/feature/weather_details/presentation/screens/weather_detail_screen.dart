@@ -242,7 +242,7 @@ class WeatherDetailScreen extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
-      childAspectRatio: 2.5, // Adjust as needed for your content
+      childAspectRatio: 1.5, // Adjust as needed for your content
       children: [
         _buildDetailItem(
           title: 'Mín./Máx.',

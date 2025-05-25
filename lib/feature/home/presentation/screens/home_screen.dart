@@ -29,10 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        // Estilos idealmente definidos en navigationBarTheme en AppTheme
-        // indicatorColor: selectedColor.withOpacity(0.2),
-        // shadowColor: colorScheme.shadow.withOpacity(0.1),
-        // surfaceTintColor: Colors.transparent,
         destinations: [
           ...HomeTabs.values.map(
             (t) => NavigationDestination(

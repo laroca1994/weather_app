@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:wheater_app/core/database/app_database.dart';
@@ -28,58 +27,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
   });
   final WeatherRemoteDataSource remoteDataSource;
   final WeatherDao localDataSource;
-
-  @override
-  Future<Either<Failure, WeatherEntity>> getWeatherForCity(
-    String cityName,
-  ) async {
-    // 1. Try to get from local cache
-    final cachedData = await localDataSource.getWeatherByCityName(
-      cityName.toLowerCase(),
-    );
-    if (cachedData != null) {
-      // Optional: Check if data is stale (e.g., older than 1 hour)
-      if (DateTime.now().difference(cachedData.lastFetched).inMinutes < 60) {
-        try {
-          final weatherModel = WeatherModel.fromJson(
-            jsonDecode(cachedData.fullJsonResponse),
-          );
-          return Right(WeatherEntity.fromWeatherModel(weatherModel, null));
-        } catch (e) {
-          // If parsing fails, proceed to fetch new data
-          debugPrint('Error parsing cached JSON: $e');
-        }
-      }
-    }
-
-    // 2. Fetch from remote
-    try {
-      final weatherModel = await remoteDataSource.getCurrentWeatherByCity(
-        cityName,
-      );
-      if (weatherModel.cod == 200) {
-        // Check for successful API response
-        final entity = WeatherEntity.fromWeatherModel(weatherModel, null);
-        // 3. Save to local cache
-        await _saveWeatherToLocal(weatherModel, entity);
-        return Right(entity);
-      } else {
-        // API returned an error (e.g., city not found)
-        return Left(
-          ServerFailure(weatherModel.message ?? 'City not found or API error'),
-        );
-      }
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
-        return Left(ServerFailure('City not found: $cityName'));
-      }
-      return Left(ServerFailure('Failed to connect to server: ${e.message}'));
-    } catch (e) {
-      return Left(
-        ServerFailure('An unexpected error occurred: ${e.toString()}'),
-      );
-    }
-  }
 
   @override
   Future<Either<Failure, WeatherEntity>> getWeatherForCoordinates(
@@ -167,7 +114,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<WeatherEntity> getWeatherForCity2({
+  Future<WeatherEntity> getWeatherForCity({
     required String cityName,
     required String imageUrl,
   }) async {

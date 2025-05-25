@@ -30,7 +30,7 @@ class DefaultWeatherController extends StateNotifier<List<WeatherEntity>> {
     for (int i = 0; i < initialCities.length; i++) {
       final cityPlaceholder = initialCities[i];
       try {
-        final cityWeather = await _weatherRepository.getWeatherForCity2(
+        final cityWeather = await _weatherRepository.getWeatherForCity(
           cityName: cityPlaceholder.cityName,
           imageUrl: cityPlaceholder.imageUrl!,
         );

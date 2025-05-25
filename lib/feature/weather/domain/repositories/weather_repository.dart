@@ -3,8 +3,7 @@ import 'package:wheater_app/core/errors/failure.dart';
 import 'package:wheater_app/feature/weather/domain/entities/weather_entity.dart';
 
 abstract class WeatherRepository {
-  Future<Either<Failure, WeatherEntity>> getWeatherForCity(String cityName);
-  Future<WeatherEntity> getWeatherForCity2({
+  Future<WeatherEntity> getWeatherForCity({
     required String cityName,
     required String imageUrl,
   });

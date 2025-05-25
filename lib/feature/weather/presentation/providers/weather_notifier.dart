@@ -48,7 +48,7 @@ class WeatherNotifier extends AsyncNotifier<WeatherEntity?> {
   Future<void> fetchWeatherForCurrentLocation() async {
     state = const AsyncValue.loading();
     try {
-      // Get current position using the FutureProvider
+      ref.invalidate(currentPositionProvider);
       final position = await ref.read(currentPositionProvider.future);
       final result = await ref
           .read(getWeatherForCoordinatesUseCaseProvider)

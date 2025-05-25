@@ -9,14 +9,9 @@ import 'package:wheater_app/core/theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
-  // Example: Initialize database instance here if needed globally early
-  // final appDatabase = AppDatabase();
 
   runApp(
     const ProviderScope(
-      // overrides: [
-      //   appDatabaseProvider.overrideWithValue(appDatabase), // If you create it here
-      // ],
       child: MyApp(),
     ),
   );
@@ -29,7 +24,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final goRouter = ref.watch(goRouterProvider);
     return MaterialApp.router(
-      title: 'Flutter Weather',
+      title: 'Weather App',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme, // Optional
       routerConfig: goRouter,

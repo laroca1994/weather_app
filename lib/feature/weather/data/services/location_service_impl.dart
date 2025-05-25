@@ -11,42 +11,55 @@ final locationServiceProvider = Provider<LocationServiceImpl>((ref) {
 class LocationServiceImpl implements LocationService {
   @override
   Future<Either<Failure, Position>> getCurrentPosition() async {
-    bool serviceEnabled;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    // Verificar si el servicio de ubicación está habilitado
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Left(LocationFailure('Location services are disabled.'));
-    }
-
-    final havePermission = await checkLocationPermission();
-    if (!havePermission) {
-      return Left(LocationFailure('Location permissions are denied'));
-    }
-
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(),
-      );
-      return Right(position);
-    } catch (e) {
       return Left(
-        LocationFailure('Failed to get current location: ${e.toString()}'),
+        LocationFailure(
+          'El servicio de ubicación está desactivado. Por favor, activá el GPS desde la configuración del dispositivo.',
+        ),
       );
     }
+
+    // Verificar permisos
+    final permissionResult = await checkLocationPermission();
+    return await permissionResult.fold(Left.new, (_) async {
+      try {
+        final position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(),
+        );
+        return Right(position);
+      } catch (e) {
+        return Left(
+          LocationFailure('Error al obtener la ubicación: ${e.toString()}'),
+        );
+      }
+    });
   }
 
   @override
-  Future<bool> checkLocationPermission() async {
+  Future<Either<Failure, Unit>> checkLocationPermission() async {
     LocationPermission permission = await Geolocator.checkPermission();
 
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever ||
-          permission == LocationPermission.denied) {
-        return false;
-      }
     }
 
-    return true;
+    if (permission == LocationPermission.denied) {
+      return Left(
+        LocationFailure('Los permisos de ubicación fueron denegados.'),
+      );
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Left(
+        LocationFailure(
+          'Los permisos de ubicación fueron denegados permanentemente. '
+          'Debes habilitarlos desde la configuración del dispositivo.',
+        ),
+      );
+    }
+
+    return const Right(unit); // Permiso concedido
   }
 }
