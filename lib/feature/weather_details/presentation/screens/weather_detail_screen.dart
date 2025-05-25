@@ -13,14 +13,11 @@ class WeatherDetailScreen extends StatelessWidget {
     if (timestamp == null || timezoneOffsetSeconds == null) {
       return '--:--';
     }
-
     final localTimestamp = timestamp + timezoneOffsetSeconds;
-
     final dateTime = DateTime.fromMillisecondsSinceEpoch(
       localTimestamp * 1000,
       isUtc: true,
     );
-
     return DateFormat('HH:mm').format(dateTime);
   }
 
@@ -48,64 +45,46 @@ class WeatherDetailScreen extends StatelessWidget {
     return DateFormat('dd/MM/yyyy HH:mm').format(lastFetched);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final Color primaryTextColor = Colors.grey[800]!;
-    final Color secondaryTextColor = Colors.grey[600]!;
-    const Color headerBackgroundColor = Color(
-      0xFFB0E0E6,
-    ); // Un azul cielo más claro
-    final Color cardBackgroundColor = Colors.grey[200]!;
-
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildHeader(context, headerBackgroundColor, primaryTextColor),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    _buildCurrentWeatherInfo(
-                      primaryTextColor,
-                      secondaryTextColor,
-                    ),
-                    const SizedBox(height: 24),
-                    _buildWeatherDetailsGrid(
-                      primaryTextColor,
-                      secondaryTextColor,
-                      cardBackgroundColor,
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  String _formatPressure(int? pressure) {
+    if (pressure == null) {
+      return 'N/A';
+    }
+    if (pressure >= 1000) {
+      final kpa = (pressure / 10).toStringAsFixed(1);
+      return '$kpa kPa';
+    }
+    return '$pressure hPa';
   }
 
-  Widget _buildHeader(
-    BuildContext context,
-    Color headerBaseColor,
-    Color textColor,
-  ) {
+  String _formatVisibility(int? visibility) {
+    if (visibility == null) {
+      return 'N/A';
+    }
+    if (visibility >= 1000) {
+      final km = (visibility / 1000).toStringAsFixed(1);
+      return '$km km';
+    }
+    return '$visibility m';
+  }
+
+  int? _getTimezone() {
+    if (weather.fullJson != null) {
+      final json = jsonDecode(weather.fullJson!) as Map<String, dynamic>;
+      return json['timezone'];
+    }
+    return null;
+  }
+
+  Widget _buildFlexibleSpaceBarBackground() {
     return Stack(
+      fit: StackFit.expand,
       alignment: Alignment.center,
       children: [
-        // Imagen de fondo
         Image.asset(
-          weather.imageUrl!, // Usamos la ruta del asset
-          height: 150, // Ajusta la altura según necesites
-          width: double.infinity,
-          fit: BoxFit.cover, // Para que la imagen cubra el espacio
+          weather.imageUrl!,
+          fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            // Si la imagen del asset no se puede cargar
             return Container(
-              height: 150,
               color: Colors.lightBlue[300],
               alignment: Alignment.center,
               child: const Text(
@@ -115,34 +94,70 @@ class WeatherDetailScreen extends StatelessWidget {
             );
           },
         ),
-        // Contenedor para oscurecer un poco la imagen y mejorar legibilidad (opcional)
-        Container(
-          height: 150,
-          width: double.infinity,
-          color: Colors.black.withValues(alpha: 0.3), // Ajusta la opacidad
-        ),
-        // Texto del nombre de la ciudad
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
-          child: Text(
-            weather.cityName, // Este es el cityName grande
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: Colors.white, // Texto blanco para contrastar con la imagen
-              shadows: <Shadow>[
-                // Sombra para mejorar legibilidad sobre imágenes variadas
-                Shadow(
-                  offset: Offset(1.0, 1.0),
-                  blurRadius: 3.0,
-                  color: Color.fromARGB(150, 0, 0, 0),
-                ),
-              ],
+        Container(color: Colors.black.withValues(alpha: 0.3)),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 24.0,
+              horizontal: 16.0,
+            ),
+            child: Text(
+              weather.cityName,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                shadows: <Shadow>[
+                  Shadow(
+                    offset: Offset(1.0, 1.0),
+                    blurRadius: 3.0,
+                    color: Color.fromARGB(150, 0, 0, 0),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color primaryTextColor = Colors.grey[800]!;
+    final Color secondaryTextColor = Colors.grey[600]!;
+    final Color cardBackgroundColor = Colors.grey[200]!;
+
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            expandedHeight:
+                150.0, // Height of the expanded app bar (image area)
+            pinned: true, // The app bar will remain visible at the top
+            flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true, // Centers the title in the collapsed app bar
+              background: _buildFlexibleSpaceBarBackground(),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(16.0),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _buildCurrentWeatherInfo(primaryTextColor, secondaryTextColor),
+                const SizedBox(height: 24),
+                _buildWeatherDetailsGrid(
+                  primaryTextColor,
+                  secondaryTextColor,
+                  cardBackgroundColor,
+                ),
+                const SizedBox(height: 24),
+              ]),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -176,42 +191,11 @@ class WeatherDetailScreen extends StatelessWidget {
           ),
         ),
         Text(
-          weather.weatherDescription, // Este campo sí lo tienes
+          weather.weatherDescription,
           style: TextStyle(fontSize: 18, color: secondaryTextColor),
         ),
       ],
     );
-  }
-
-  String _formatPressure(int? pressure) {
-    if (pressure == null) {
-      return 'N/A';
-    }
-    // Convertir hPa a kPa si es posible
-    if (pressure >= 1000) {
-      final kpa = (pressure / 10).toStringAsFixed(1);
-      return '$kpa kPa';
-    }
-    return '$pressure hPa';
-  }
-
-  String _formatVisibility(int? visibility) {
-    if (visibility == null) {
-      return 'N/A';
-    }
-    if (visibility >= 1000) {
-      final km = (visibility / 1000).toStringAsFixed(1);
-      return '$km km';
-    }
-    return '$visibility m';
-  }
-
-  int? _getTimezone() {
-    if (weather.fullJson != null) {
-      final json = jsonDecode(weather.fullJson!) as Map<String, dynamic>;
-      return json['timezone'];
-    }
-    return null;
   }
 
   Widget _buildWeatherDetailsGrid(
@@ -233,26 +217,32 @@ class WeatherDetailScreen extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
-      childAspectRatio: 2.5,
+      childAspectRatio: 2.5, // Adjust as needed for your content
       children: [
         _buildDetailItem(
           title: 'Mín./Máx.',
-          value: '${weather.tempMin.round()}°C / ${weather.tempMax.round()}°C',
+          value:
+              weather.tempMin != -1 && weather.tempMax != -1
+                  ? '${weather.tempMin.round()}°C / ${weather.tempMax.round()}°C'
+                  : 'N/A',
           primaryColor: primaryTextColor,
           secondaryColor: secondaryTextColor,
           backgroundColor: cardBackgroundColor,
         ),
         _buildDetailItem(
           title: 'Viento',
-          // Solo mostramos velocidad, ya que la dirección no está en WeatherEntity
-          value: '${weather.windSpeed.round()} km/h',
+          value:
+              weather.windSpeed != -1
+                  ? '${weather.windSpeed.round()} km/h'
+                  : 'N/A',
           primaryColor: primaryTextColor,
           secondaryColor: secondaryTextColor,
           backgroundColor: cardBackgroundColor,
         ),
+
         _buildDetailItem(
           title: 'Humedad',
-          value: '${weather.humidity}%',
+          value: weather.humidity != -1 ? '${weather.humidity}%' : 'N/A',
           primaryColor: primaryTextColor,
           secondaryColor: secondaryTextColor,
           backgroundColor: cardBackgroundColor,
@@ -309,6 +299,8 @@ class WeatherDetailScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: primaryColor,
             ),
+            maxLines: 1, // Ensure text fits well
+            overflow: TextOverflow.ellipsis, // Handle overflow
           ),
         ],
       ),
