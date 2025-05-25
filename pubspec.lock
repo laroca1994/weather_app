@@ -427,6 +427,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "15.1.2"
+  go_router_builder:
+    dependency: "direct main"
+    description:
+      name: go_router_builder
+      sha256: "7f6f4bfb97cadc3d25378a0237fe4ddd98b54d6094b5a5c158b775a2cc30843e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.9.0"
   google_places_flutter:
     dependency: "direct main"
     description:

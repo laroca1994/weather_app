@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wheater_app/core/router/app_router.dart';
+import 'package:wheater_app/core/router/router.dart';
 import 'package:wheater_app/core/theme/app_theme.dart';
 // Import your database provider if you initialize it here
 // import 'package:flutter_weather_app/data/database/app_database.dart';
