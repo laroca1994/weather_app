@@ -17,7 +17,7 @@ Esta app permite buscar el estado del tiempo actual de una ciudad usando datos d
 1. **CDescomprimir el zip**  
 
    ```bash
-   cd flutter-weather-app
+   cd weather_app
    ```
 
 2. **Instalar dependencias**  
