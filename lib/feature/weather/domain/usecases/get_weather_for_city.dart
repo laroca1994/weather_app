@@ -14,10 +14,7 @@ class GetWeatherForCity {
     required String cityName,
     required String country,
   }) {
-    return repository.getWeatherForCityAndCountry(
-      cityName: cityName,
-      country: country,
-    );
+    return repository.getWeatherForCity(cityName);
   }
 }
 

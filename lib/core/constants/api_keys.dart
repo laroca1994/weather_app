@@ -16,4 +16,12 @@ class ApiKeys {
     }
     return key;
   }
+
+  static String get unplashApiKey {
+    final key = dotenv.env['UNPLASH_API_KEY'];
+    if (key == null) {
+      throw Exception('UNPLASH_API_KEY not found in .env file');
+    }
+    return key;
+  }
 }

@@ -5,7 +5,7 @@ import 'package:wheater_app/core/constants/api_keys.dart';
 import 'package:wheater_app/core/constants/app_constants.dart';
 
 
-final dioProvider = Provider<Dio>((ref) {
+final openWeatherDioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: AppConstants.openWeatherMapBaseUrl,

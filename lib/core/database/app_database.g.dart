@@ -9,6 +9,19 @@ class $SavedWeatherTable extends SavedWeather
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $SavedWeatherTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
   static const VerificationMeta _cityNameMeta = const VerificationMeta(
     'cityName',
   );
@@ -141,8 +154,35 @@ class $SavedWeatherTable extends SavedWeather
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
+    'imageUrl',
+  );
+  @override
+  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
+    'image_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDefaultMeta = const VerificationMeta(
+    'isDefault',
+  );
+  @override
+  late final GeneratedColumn<bool> isDefault = GeneratedColumn<bool>(
+    'is_default',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_default" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
+    id,
     cityName,
     country,
     temperature,
@@ -155,6 +195,8 @@ class $SavedWeatherTable extends SavedWeather
     windSpeed,
     lastFetched,
     fullJsonResponse,
+    imageUrl,
+    isDefault,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -168,6 +210,9 @@ class $SavedWeatherTable extends SavedWeather
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
     if (data.containsKey('city_name')) {
       context.handle(
         _cityNameMeta,
@@ -280,15 +325,32 @@ class $SavedWeatherTable extends SavedWeather
     } else if (isInserting) {
       context.missing(_fullJsonResponseMeta);
     }
+    if (data.containsKey('image_url')) {
+      context.handle(
+        _imageUrlMeta,
+        imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
+      );
+    }
+    if (data.containsKey('is_default')) {
+      context.handle(
+        _isDefaultMeta,
+        isDefault.isAcceptableOrUnknown(data['is_default']!, _isDefaultMeta),
+      );
+    }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {cityName, country};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
   SavedWeatherData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SavedWeatherData(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
       cityName:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
@@ -348,6 +410,15 @@ class $SavedWeatherTable extends SavedWeather
             DriftSqlType.string,
             data['${effectivePrefix}full_json_response'],
           )!,
+      imageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_url'],
+      ),
+      isDefault:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_default'],
+          )!,
     );
   }
 
@@ -359,6 +430,7 @@ class $SavedWeatherTable extends SavedWeather
 
 class SavedWeatherData extends DataClass
     implements Insertable<SavedWeatherData> {
+  final int id;
   final String cityName;
   final String? country;
   final double temperature;
@@ -371,7 +443,10 @@ class SavedWeatherData extends DataClass
   final double windSpeed;
   final DateTime lastFetched;
   final String fullJsonResponse;
+  final String? imageUrl;
+  final bool isDefault;
   const SavedWeatherData({
+    required this.id,
     required this.cityName,
     this.country,
     required this.temperature,
@@ -384,10 +459,13 @@ class SavedWeatherData extends DataClass
     required this.windSpeed,
     required this.lastFetched,
     required this.fullJsonResponse,
+    this.imageUrl,
+    required this.isDefault,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
     map['city_name'] = Variable<String>(cityName);
     if (!nullToAbsent || country != null) {
       map['country'] = Variable<String>(country);
@@ -402,11 +480,16 @@ class SavedWeatherData extends DataClass
     map['wind_speed'] = Variable<double>(windSpeed);
     map['last_fetched'] = Variable<DateTime>(lastFetched);
     map['full_json_response'] = Variable<String>(fullJsonResponse);
+    if (!nullToAbsent || imageUrl != null) {
+      map['image_url'] = Variable<String>(imageUrl);
+    }
+    map['is_default'] = Variable<bool>(isDefault);
     return map;
   }
 
   SavedWeatherCompanion toCompanion(bool nullToAbsent) {
     return SavedWeatherCompanion(
+      id: Value(id),
       cityName: Value(cityName),
       country:
           country == null && nullToAbsent
@@ -422,6 +505,11 @@ class SavedWeatherData extends DataClass
       windSpeed: Value(windSpeed),
       lastFetched: Value(lastFetched),
       fullJsonResponse: Value(fullJsonResponse),
+      imageUrl:
+          imageUrl == null && nullToAbsent
+              ? const Value.absent()
+              : Value(imageUrl),
+      isDefault: Value(isDefault),
     );
   }
 
@@ -431,6 +519,7 @@ class SavedWeatherData extends DataClass
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SavedWeatherData(
+      id: serializer.fromJson<int>(json['id']),
       cityName: serializer.fromJson<String>(json['cityName']),
       country: serializer.fromJson<String?>(json['country']),
       temperature: serializer.fromJson<double>(json['temperature']),
@@ -445,12 +534,15 @@ class SavedWeatherData extends DataClass
       windSpeed: serializer.fromJson<double>(json['windSpeed']),
       lastFetched: serializer.fromJson<DateTime>(json['lastFetched']),
       fullJsonResponse: serializer.fromJson<String>(json['fullJsonResponse']),
+      imageUrl: serializer.fromJson<String?>(json['imageUrl']),
+      isDefault: serializer.fromJson<bool>(json['isDefault']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
       'cityName': serializer.toJson<String>(cityName),
       'country': serializer.toJson<String?>(country),
       'temperature': serializer.toJson<double>(temperature),
@@ -463,10 +555,13 @@ class SavedWeatherData extends DataClass
       'windSpeed': serializer.toJson<double>(windSpeed),
       'lastFetched': serializer.toJson<DateTime>(lastFetched),
       'fullJsonResponse': serializer.toJson<String>(fullJsonResponse),
+      'imageUrl': serializer.toJson<String?>(imageUrl),
+      'isDefault': serializer.toJson<bool>(isDefault),
     };
   }
 
   SavedWeatherData copyWith({
+    int? id,
     String? cityName,
     Value<String?> country = const Value.absent(),
     double? temperature,
@@ -479,7 +574,10 @@ class SavedWeatherData extends DataClass
     double? windSpeed,
     DateTime? lastFetched,
     String? fullJsonResponse,
+    Value<String?> imageUrl = const Value.absent(),
+    bool? isDefault,
   }) => SavedWeatherData(
+    id: id ?? this.id,
     cityName: cityName ?? this.cityName,
     country: country.present ? country.value : this.country,
     temperature: temperature ?? this.temperature,
@@ -492,9 +590,12 @@ class SavedWeatherData extends DataClass
     windSpeed: windSpeed ?? this.windSpeed,
     lastFetched: lastFetched ?? this.lastFetched,
     fullJsonResponse: fullJsonResponse ?? this.fullJsonResponse,
+    imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
+    isDefault: isDefault ?? this.isDefault,
   );
   SavedWeatherData copyWithCompanion(SavedWeatherCompanion data) {
     return SavedWeatherData(
+      id: data.id.present ? data.id.value : this.id,
       cityName: data.cityName.present ? data.cityName.value : this.cityName,
       country: data.country.present ? data.country.value : this.country,
       temperature:
@@ -517,12 +618,15 @@ class SavedWeatherData extends DataClass
           data.fullJsonResponse.present
               ? data.fullJsonResponse.value
               : this.fullJsonResponse,
+      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
+      isDefault: data.isDefault.present ? data.isDefault.value : this.isDefault,
     );
   }
 
   @override
   String toString() {
     return (StringBuffer('SavedWeatherData(')
+          ..write('id: $id, ')
           ..write('cityName: $cityName, ')
           ..write('country: $country, ')
           ..write('temperature: $temperature, ')
@@ -534,13 +638,16 @@ class SavedWeatherData extends DataClass
           ..write('humidity: $humidity, ')
           ..write('windSpeed: $windSpeed, ')
           ..write('lastFetched: $lastFetched, ')
-          ..write('fullJsonResponse: $fullJsonResponse')
+          ..write('fullJsonResponse: $fullJsonResponse, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('isDefault: $isDefault')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(
+    id,
     cityName,
     country,
     temperature,
@@ -553,11 +660,14 @@ class SavedWeatherData extends DataClass
     windSpeed,
     lastFetched,
     fullJsonResponse,
+    imageUrl,
+    isDefault,
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SavedWeatherData &&
+          other.id == this.id &&
           other.cityName == this.cityName &&
           other.country == this.country &&
           other.temperature == this.temperature &&
@@ -569,10 +679,13 @@ class SavedWeatherData extends DataClass
           other.humidity == this.humidity &&
           other.windSpeed == this.windSpeed &&
           other.lastFetched == this.lastFetched &&
-          other.fullJsonResponse == this.fullJsonResponse);
+          other.fullJsonResponse == this.fullJsonResponse &&
+          other.imageUrl == this.imageUrl &&
+          other.isDefault == this.isDefault);
 }
 
 class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
+  final Value<int> id;
   final Value<String> cityName;
   final Value<String?> country;
   final Value<double> temperature;
@@ -585,8 +698,10 @@ class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
   final Value<double> windSpeed;
   final Value<DateTime> lastFetched;
   final Value<String> fullJsonResponse;
-  final Value<int> rowid;
+  final Value<String?> imageUrl;
+  final Value<bool> isDefault;
   const SavedWeatherCompanion({
+    this.id = const Value.absent(),
     this.cityName = const Value.absent(),
     this.country = const Value.absent(),
     this.temperature = const Value.absent(),
@@ -599,9 +714,11 @@ class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
     this.windSpeed = const Value.absent(),
     this.lastFetched = const Value.absent(),
     this.fullJsonResponse = const Value.absent(),
-    this.rowid = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.isDefault = const Value.absent(),
   });
   SavedWeatherCompanion.insert({
+    this.id = const Value.absent(),
     required String cityName,
     this.country = const Value.absent(),
     required double temperature,
@@ -614,7 +731,8 @@ class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
     required double windSpeed,
     required DateTime lastFetched,
     required String fullJsonResponse,
-    this.rowid = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.isDefault = const Value.absent(),
   }) : cityName = Value(cityName),
        temperature = Value(temperature),
        tempMin = Value(tempMin),
@@ -627,6 +745,7 @@ class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
        lastFetched = Value(lastFetched),
        fullJsonResponse = Value(fullJsonResponse);
   static Insertable<SavedWeatherData> custom({
+    Expression<int>? id,
     Expression<String>? cityName,
     Expression<String>? country,
     Expression<double>? temperature,
@@ -639,9 +758,11 @@ class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
     Expression<double>? windSpeed,
     Expression<DateTime>? lastFetched,
     Expression<String>? fullJsonResponse,
-    Expression<int>? rowid,
+    Expression<String>? imageUrl,
+    Expression<bool>? isDefault,
   }) {
     return RawValuesInsertable({
+      if (id != null) 'id': id,
       if (cityName != null) 'city_name': cityName,
       if (country != null) 'country': country,
       if (temperature != null) 'temperature': temperature,
@@ -654,11 +775,13 @@ class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
       if (windSpeed != null) 'wind_speed': windSpeed,
       if (lastFetched != null) 'last_fetched': lastFetched,
       if (fullJsonResponse != null) 'full_json_response': fullJsonResponse,
-      if (rowid != null) 'rowid': rowid,
+      if (imageUrl != null) 'image_url': imageUrl,
+      if (isDefault != null) 'is_default': isDefault,
     });
   }
 
   SavedWeatherCompanion copyWith({
+    Value<int>? id,
     Value<String>? cityName,
     Value<String?>? country,
     Value<double>? temperature,
@@ -671,9 +794,11 @@ class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
     Value<double>? windSpeed,
     Value<DateTime>? lastFetched,
     Value<String>? fullJsonResponse,
-    Value<int>? rowid,
+    Value<String?>? imageUrl,
+    Value<bool>? isDefault,
   }) {
     return SavedWeatherCompanion(
+      id: id ?? this.id,
       cityName: cityName ?? this.cityName,
       country: country ?? this.country,
       temperature: temperature ?? this.temperature,
@@ -686,13 +811,17 @@ class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
       windSpeed: windSpeed ?? this.windSpeed,
       lastFetched: lastFetched ?? this.lastFetched,
       fullJsonResponse: fullJsonResponse ?? this.fullJsonResponse,
-      rowid: rowid ?? this.rowid,
+      imageUrl: imageUrl ?? this.imageUrl,
+      isDefault: isDefault ?? this.isDefault,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
     if (cityName.present) {
       map['city_name'] = Variable<String>(cityName.value);
     }
@@ -729,8 +858,11 @@ class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
     if (fullJsonResponse.present) {
       map['full_json_response'] = Variable<String>(fullJsonResponse.value);
     }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
+    if (imageUrl.present) {
+      map['image_url'] = Variable<String>(imageUrl.value);
+    }
+    if (isDefault.present) {
+      map['is_default'] = Variable<bool>(isDefault.value);
     }
     return map;
   }
@@ -738,6 +870,7 @@ class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
   @override
   String toString() {
     return (StringBuffer('SavedWeatherCompanion(')
+          ..write('id: $id, ')
           ..write('cityName: $cityName, ')
           ..write('country: $country, ')
           ..write('temperature: $temperature, ')
@@ -750,7 +883,8 @@ class SavedWeatherCompanion extends UpdateCompanion<SavedWeatherData> {
           ..write('windSpeed: $windSpeed, ')
           ..write('lastFetched: $lastFetched, ')
           ..write('fullJsonResponse: $fullJsonResponse, ')
-          ..write('rowid: $rowid')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('isDefault: $isDefault')
           ..write(')'))
         .toString();
   }
@@ -769,6 +903,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 
 typedef $$SavedWeatherTableCreateCompanionBuilder =
     SavedWeatherCompanion Function({
+      Value<int> id,
       required String cityName,
       Value<String?> country,
       required double temperature,
@@ -781,10 +916,12 @@ typedef $$SavedWeatherTableCreateCompanionBuilder =
       required double windSpeed,
       required DateTime lastFetched,
       required String fullJsonResponse,
-      Value<int> rowid,
+      Value<String?> imageUrl,
+      Value<bool> isDefault,
     });
 typedef $$SavedWeatherTableUpdateCompanionBuilder =
     SavedWeatherCompanion Function({
+      Value<int> id,
       Value<String> cityName,
       Value<String?> country,
       Value<double> temperature,
@@ -797,7 +934,8 @@ typedef $$SavedWeatherTableUpdateCompanionBuilder =
       Value<double> windSpeed,
       Value<DateTime> lastFetched,
       Value<String> fullJsonResponse,
-      Value<int> rowid,
+      Value<String?> imageUrl,
+      Value<bool> isDefault,
     });
 
 class $$SavedWeatherTableFilterComposer
@@ -809,6 +947,11 @@ class $$SavedWeatherTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get cityName => $composableBuilder(
     column: $table.cityName,
     builder: (column) => ColumnFilters(column),
@@ -868,6 +1011,16 @@ class $$SavedWeatherTableFilterComposer
     column: $table.fullJsonResponse,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDefault => $composableBuilder(
+    column: $table.isDefault,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$SavedWeatherTableOrderingComposer
@@ -879,6 +1032,11 @@ class $$SavedWeatherTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get cityName => $composableBuilder(
     column: $table.cityName,
     builder: (column) => ColumnOrderings(column),
@@ -938,6 +1096,16 @@ class $$SavedWeatherTableOrderingComposer
     column: $table.fullJsonResponse,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDefault => $composableBuilder(
+    column: $table.isDefault,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SavedWeatherTableAnnotationComposer
@@ -949,6 +1117,9 @@ class $$SavedWeatherTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
   GeneratedColumn<String> get cityName =>
       $composableBuilder(column: $table.cityName, builder: (column) => column);
 
@@ -996,6 +1167,12 @@ class $$SavedWeatherTableAnnotationComposer
     column: $table.fullJsonResponse,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get imageUrl =>
+      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDefault =>
+      $composableBuilder(column: $table.isDefault, builder: (column) => column);
 }
 
 class $$SavedWeatherTableTableManager
@@ -1030,6 +1207,7 @@ class $$SavedWeatherTableTableManager
                   $$SavedWeatherTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
+                Value<int> id = const Value.absent(),
                 Value<String> cityName = const Value.absent(),
                 Value<String?> country = const Value.absent(),
                 Value<double> temperature = const Value.absent(),
@@ -1042,8 +1220,10 @@ class $$SavedWeatherTableTableManager
                 Value<double> windSpeed = const Value.absent(),
                 Value<DateTime> lastFetched = const Value.absent(),
                 Value<String> fullJsonResponse = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+                Value<bool> isDefault = const Value.absent(),
               }) => SavedWeatherCompanion(
+                id: id,
                 cityName: cityName,
                 country: country,
                 temperature: temperature,
@@ -1056,10 +1236,12 @@ class $$SavedWeatherTableTableManager
                 windSpeed: windSpeed,
                 lastFetched: lastFetched,
                 fullJsonResponse: fullJsonResponse,
-                rowid: rowid,
+                imageUrl: imageUrl,
+                isDefault: isDefault,
               ),
           createCompanionCallback:
               ({
+                Value<int> id = const Value.absent(),
                 required String cityName,
                 Value<String?> country = const Value.absent(),
                 required double temperature,
@@ -1072,8 +1254,10 @@ class $$SavedWeatherTableTableManager
                 required double windSpeed,
                 required DateTime lastFetched,
                 required String fullJsonResponse,
-                Value<int> rowid = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+                Value<bool> isDefault = const Value.absent(),
               }) => SavedWeatherCompanion.insert(
+                id: id,
                 cityName: cityName,
                 country: country,
                 temperature: temperature,
@@ -1086,7 +1270,8 @@ class $$SavedWeatherTableTableManager
                 windSpeed: windSpeed,
                 lastFetched: lastFetched,
                 fullJsonResponse: fullJsonResponse,
-                rowid: rowid,
+                imageUrl: imageUrl,
+                isDefault: isDefault,
               ),
           withReferenceMapper:
               (p0) =>

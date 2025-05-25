@@ -1,14 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retrofit/retrofit.dart';
-import 'package:wheater_app/core/network/dio_client.dart';
+import 'package:wheater_app/core/network/open_weather_dio_client.dart';
 import 'package:wheater_app/feature/weather/data/models/weather_model.dart';
 
 part 'weather_remote_datasource.g.dart';
 
 
 final weatherRemoteDataSourceProvider = Provider<WeatherRemoteDataSource>((ref) {
-  final dio = ref.watch(dioProvider);
+  final dio = ref.watch(openWeatherDioProvider);
   return WeatherRemoteDataSource(dio);
 });
 

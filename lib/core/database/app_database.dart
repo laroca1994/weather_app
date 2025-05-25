@@ -13,6 +13,7 @@ part 'app_database.g.dart';
 // Define the table
 @DataClassName('SavedWeatherData')
 class SavedWeather extends Table {
+  IntColumn get id => integer().autoIncrement()();
   TextColumn get cityName => text()();
   TextColumn get country => text().nullable()();
   RealColumn get temperature => real()();
@@ -26,9 +27,8 @@ class SavedWeather extends Table {
   DateTimeColumn get lastFetched => dateTime()(); // To know how old the data is
   TextColumn get fullJsonResponse =>
       text()(); // Store the raw JSON for simplicity to re-parse
-
-  @override
-  Set<Column<Object>>? get primaryKey => {cityName, country};
+  TextColumn get imageUrl => text().nullable()();
+  BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
 }
 
 @DriftDatabase(tables: [SavedWeather])
@@ -63,12 +63,9 @@ class WeatherDao extends DatabaseAccessor<AppDatabase> with _$WeatherDaoMixin {
 
   Future<List<SavedWeatherData>> getAllSearches() => select(savedWeather).get();
 
-  Future<SavedWeatherData?> getWeatherByCityName({
-    required String cityName,
-    required String country,
-  }) {
+  Future<SavedWeatherData?> getWeatherByCityName(String cityName) {
     return (select(savedWeather)..where(
-      (tbl) => tbl.cityName.equals(cityName) & tbl.country.equals(country),
+      (tbl) => tbl.cityName.equals(cityName) & tbl.isDefault.equals(true),
     )).getSingleOrNull();
   }
 

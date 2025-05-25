@@ -6,7 +6,7 @@ class CityCoordinates {
     required this.imageUrl,
   });
   final String city;
-  final String lat;
-  final String lon;
+  final double lat;
+  final double lon;
   final String imageUrl;
 }

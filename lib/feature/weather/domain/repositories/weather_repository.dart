@@ -3,9 +3,10 @@ import 'package:wheater_app/core/errors/failure.dart';
 import 'package:wheater_app/feature/weather/domain/entities/weather_entity.dart';
 
 abstract class WeatherRepository {
-  Future<Either<Failure, WeatherEntity>> getWeatherForCityAndCountry({
+  Future<Either<Failure, WeatherEntity>> getWeatherForCity(String cityName);
+  Future<WeatherEntity> getWeatherForCity2({
     required String cityName,
-    required String country,
+    required String imageUrl,
   });
   Future<Either<Failure, WeatherEntity>> getWeatherForCoordinates(
     double lat,

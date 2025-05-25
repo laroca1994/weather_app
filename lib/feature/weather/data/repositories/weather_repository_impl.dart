@@ -19,7 +19,8 @@ final weatherRepositoryProvider = Provider<WeatherRepository>((ref) {
   );
 });
 
-class WeatherRepositoryImpl implements WeatherRepository { // Assuming you've named your DAO this way
+class WeatherRepositoryImpl implements WeatherRepository {
+  // Assuming you've named your DAO this way
 
   WeatherRepositoryImpl({
     required this.remoteDataSource,
@@ -29,14 +30,12 @@ class WeatherRepositoryImpl implements WeatherRepository { // Assuming you've na
   final WeatherDao localDataSource;
 
   @override
-  Future<Either<Failure, WeatherEntity>> getWeatherForCityAndCountry({
-    required String cityName,
-    required String country,
-  }) async {
+  Future<Either<Failure, WeatherEntity>> getWeatherForCity(
+    String cityName,
+  ) async {
     // 1. Try to get from local cache
     final cachedData = await localDataSource.getWeatherByCityName(
-      cityName: cityName.toLowerCase(),
-      country: country.toLowerCase(),
+      cityName.toLowerCase(),
     );
     if (cachedData != null) {
       // Optional: Check if data is stale (e.g., older than 1 hour)
@@ -45,7 +44,7 @@ class WeatherRepositoryImpl implements WeatherRepository { // Assuming you've na
           final weatherModel = WeatherModel.fromJson(
             jsonDecode(cachedData.fullJsonResponse),
           );
-          return Right(WeatherEntity.fromWeatherModel(weatherModel));
+          return Right(WeatherEntity.fromWeatherModel(weatherModel, null));
         } catch (e) {
           // If parsing fails, proceed to fetch new data
           debugPrint('Error parsing cached JSON: $e');
@@ -60,7 +59,7 @@ class WeatherRepositoryImpl implements WeatherRepository { // Assuming you've na
       );
       if (weatherModel.cod == 200) {
         // Check for successful API response
-        final entity = WeatherEntity.fromWeatherModel(weatherModel);
+        final entity = WeatherEntity.fromWeatherModel(weatherModel, null);
         // 3. Save to local cache
         await _saveWeatherToLocal(weatherModel, entity);
         return Right(entity);
@@ -92,7 +91,7 @@ class WeatherRepositoryImpl implements WeatherRepository { // Assuming you've na
       final weatherModel = await remoteDataSource
           .getCurrentWeatherByCoordinates(lat, lon);
       if (weatherModel.cod == 200) {
-        final entity = WeatherEntity.fromWeatherModel(weatherModel);
+        final entity = WeatherEntity.fromWeatherModel(weatherModel, null);
         await _saveWeatherToLocal(
           weatherModel,
           entity,
@@ -116,9 +115,12 @@ class WeatherRepositoryImpl implements WeatherRepository { // Assuming you've na
 
   Future<void> _saveWeatherToLocal(
     WeatherModel model,
-    WeatherEntity entity,
-  ) async {
+    WeatherEntity entity, {
+    bool isDefault = false,
+    int? id,
+  }) async {
     final entry = SavedWeatherCompanion(
+      id: id != null ? Value(id) : const Value.absent(),
       cityName: Value(
         entity.cityName.toLowerCase(),
       ), // Store lowercase for consistent lookup
@@ -133,6 +135,8 @@ class WeatherRepositoryImpl implements WeatherRepository { // Assuming you've na
       windSpeed: Value(entity.windSpeed),
       lastFetched: Value(entity.lastFetched ?? DateTime.now()),
       fullJsonResponse: Value(jsonEncode(model.toJson())), // Store raw model
+      isDefault: Value(isDefault),
+      imageUrl: Value(entity.imageUrl),
     );
     await localDataSource.insertWeather(entry);
   }
@@ -146,7 +150,7 @@ class WeatherRepositoryImpl implements WeatherRepository { // Assuming you've na
             final weatherModel = WeatherModel.fromJson(
               jsonDecode(data.fullJsonResponse),
             );
-            return WeatherEntity.fromWeatherModel(weatherModel);
+            return WeatherEntity.fromWeatherModel(weatherModel, null);
           }).toList();
       // Sort by last fetched, newest first
       entities.sort(
@@ -160,5 +164,35 @@ class WeatherRepositoryImpl implements WeatherRepository { // Assuming you've na
         CacheFailure('Failed to retrieve saved searches: ${e.toString()}'),
       );
     }
+  }
+
+  @override
+  Future<WeatherEntity> getWeatherForCity2({
+    required String cityName,
+    required String imageUrl,
+  }) async {
+    final cachedData = await localDataSource.getWeatherByCityName(
+      cityName.toLowerCase(),
+    );
+    int? id;
+    if (cachedData != null) {
+      id = cachedData.id;
+      // Optional: Check if data is stale (e.g., older than 1 hour)
+      if (DateTime.now().difference(cachedData.lastFetched).inMinutes < 60) {
+        final weatherModel = WeatherModel.fromJson(
+          jsonDecode(cachedData.fullJsonResponse),
+        );
+        return WeatherEntity.fromWeatherModel(weatherModel, imageUrl);
+      }
+    }
+
+    final weatherModel = await remoteDataSource.getCurrentWeatherByCity(
+      cityName,
+    );
+    // Check for successful API response
+    final entity = WeatherEntity.fromWeatherModel(weatherModel, imageUrl);
+    // 3. Save to local cache
+    await _saveWeatherToLocal(weatherModel, entity, isDefault: true, id: id);
+    return entity;
   }
 }
